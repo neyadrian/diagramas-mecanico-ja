@@ -1,0 +1,74 @@
+@startuml
+!theme plain
+hide circle
+skinparam linetype ortho
+
+entity "Usuario" as usuario {
+  * id : UUID <<PK>>
+  --
+  * nome : String
+  * email : String
+  * telefone : String
+  * senha_hash : String
+  * tipo_usuario : Enum(MOTORISTA, MECANICO)
+  * criado_em : DateTime
+}
+
+entity "Veiculo" as veiculo {
+  * id : UUID <<PK>>
+  --
+  * motorista_id : UUID <<FK>>
+  * marca : String
+  * modelo : String
+  * ano : Integer
+  * tipo_combustivel : String
+}
+
+entity "PerfilMecanico" as mecanico {
+  * id : UUID <<PK>>
+  --
+  * user_id : UUID <<FK>>
+  * especialidades : String
+  * raio_atendimento_km : Float
+  * disponivel : Boolean
+  * localizacao_atual : Geometry(Point)
+}
+
+entity "Diagnosticos" as diagnosticos {
+  * id : UUID <<PK>>
+  --
+  * motorista_id : UUID <<FK>>
+  * veiculo_id : UUID <<FK>>
+  * sintomas_relatados : Text
+  * ia_pre_diagnostico : Text
+  * criado_em : DateTime
+}
+
+entity "ChamadoAssistencia" as chamado {
+  * id : UUID <<PK>>
+  --
+  * diagnosis_id : UUID <<FK>>
+  * motorista_id : UUID <<FK>>
+  mecanico_id : UUID <<FK>> <<nullable>>
+  * status : Enum(PENDENTE, ACEITO, RECUSADO, CONCLUIDO)
+  * criado_em : DateTime
+}
+
+entity "MensagemChat" as mensagem {
+  * id : UUID <<PK>>
+  --
+  * call_id : UUID <<FK>>
+  * remetente_id : UUID <<FK>>
+  * conteudo : Text
+  * enviado_em : DateTime
+}
+
+usuario ||--o{ veiculo : "cadastra"
+usuario ||--o| mecanico : "possui perfil"
+usuario ||--o{ diagnosticos : "solicita"
+usuario ||--o{ chamado : "participa"
+veiculo ||--o{ diagnosticos : "referente a"
+diagnosticos ||--o| chamado : "utilizado em"
+chamado ||--o{ mensagem : "possui"
+
+@enduml
